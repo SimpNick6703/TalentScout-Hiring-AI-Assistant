@@ -128,4 +128,4 @@ Adjust the application behavior in `config.py`:
 
 ## License
 
-This project is proprietary and confidential.
+UNLICENSE
