@@ -1,8 +1,3 @@
-"""
-AI-Driven Hiring Assistant Chatbot
-Fully leverages LLM intelligence for dynamic interview conduct
-"""
-
 import openai
 import json
 import re
@@ -11,10 +6,7 @@ from datetime import datetime
 from config import OPENAI_CONFIG
 
 class HiringAssistant:
-    """AI-driven chatbot for hiring assistance - fully LLM powered"""
-    
     def __init__(self):
-        """Initialize the hiring assistant"""
         self.client = openai.OpenAI(
             base_url=OPENAI_CONFIG["base_url"],
             api_key=OPENAI_CONFIG["api_key"]
@@ -41,7 +33,6 @@ class HiringAssistant:
         self._add_to_history('assistant', self.get_greeting())
         
     def get_greeting(self) -> str:
-        """Get initial greeting message"""
         return """👋 Hello! Welcome to TalentScout's AI Hiring Assistant!
 
 I'm here to conduct your technical interview for a software development position. 
@@ -55,43 +46,41 @@ During our structured interview, I will:\n
 Let's start by getting to know you better! Could you please tell me your full name?"""
 
     def _get_current_phase(self) -> str:
-        """Get current interview phase"""
         if self.current_phase_index < len(self.interview_phases):
             return self.interview_phases[self.current_phase_index]
         return 'completed'
 
     def _get_system_prompt(self) -> str:
-        """Generate comprehensive system prompt for AI interviewer"""
         current_phase = self._get_current_phase()
         missing_info = [field for field in self.required_fields if field not in self.candidate_data]
         
         # Build conversational system prompt
         base_prompt = f"""You are TalentScout, an expert AI hiring assistant conducting a CONVERSATIONAL technical interview for a software development position.
 
-🚨 CRITICAL INFORMATION GATHERING RULE 🚨
+CRITICAL INFORMATION GATHERING RULE
 You MUST collect ALL required candidate information before proceeding to technical questions.
 
 REQUIRED CANDIDATE INFORMATION (MUST COLLECT ALL):
-✓ name: Full name of the candidate
-✓ email: Professional email address  
-✓ phone: Contact phone number
-✓ experience: Years of professional experience
-✓ position: Target role/position applying for
-✓ location: Current location/availability
-✓ tech_stack: Programming languages, frameworks, technologies
+- name: Full name of the candidate
+- email: Professional email address  
+- phone: Contact phone number
+- experience: Years of professional experience
+- position: Target role/position applying for
+- location: Current location/availability
+- tech_stack: Programming languages, frameworks, technologies
 
 CURRENT STATUS:
 - Interview Phase: {current_phase}
 - Missing Information: {missing_info}
 - Technical Questions Asked: {self.technical_questions_asked}/{self.max_technical_questions}
 
-🗣️ CONVERSATIONAL INTERVIEW STYLE:
-1. 🔴 INFORMATION FIRST: If ANY required information is missing, ask for it before technical questions
-2. 🔴 ONE QUESTION ONLY: Ask exactly ONE question per response - never multiple questions
-3. 🔴 KEEP IT SHORT: Your responses should be 1-2 sentences maximum
-4. 🔴 EXPECT SHORT ANSWERS: Candidates should give 30-50 word responses, not essays
-5. 🔴 BE CONVERSATIONAL: Sound friendly and natural, like chatting with a colleague
-6. 🔴 BRIEF ACKNOWLEDGMENT: Quick "Great!" or "Perfect!" before next question
+CONVERSATIONAL INTERVIEW STYLE:
+1. INFORMATION FIRST: If ANY required information is missing, ask for it before technical questions
+2. ONE QUESTION ONLY: Ask exactly ONE question per response - never multiple questions
+3. KEEP IT SHORT: Your responses should be 1-2 sentences maximum
+4. EXPECT SHORT ANSWERS: Candidates should give 30-50 word responses, not essays
+5. BE CONVERSATIONAL: Sound friendly and natural, like chatting with a colleague
+6. BRIEF ACKNOWLEDGMENT: Quick "Great!" or "Perfect!" before next question
 
 TECHNICAL QUESTION GUIDELINES:
 - Ask ONE specific, focused question at a time
@@ -104,12 +93,12 @@ CURRENT PHASE FOCUS:
 {self._get_phase_instructions(current_phase)}
 
 CONVERSATION EXAMPLES:
-✅ GOOD: "Great! What's your email address?"
-✅ GOOD: "Perfect! How many years of experience do you have?"
-✅ GOOD: "Nice! How do you usually handle API rate limits?"
-❌ BAD: "Can you tell me about your experience with APIs, error handling, and also your projects?"
-❌ BAD: Asking multiple questions in one response
-❌ BAD: Long responses expecting detailed explanations
+GOOD: "Great! What's your email address?"
+GOOD: "Perfect! How many years of experience do you have?"
+GOOD: "Nice! How do you usually handle API rate limits?"
+BAD: "Can you tell me about your experience with APIs, error handling, and also your projects?"
+BAD: Asking multiple questions in one response
+BAD: Long responses expecting detailed explanations
 
 REMEMBER: Keep it conversational, ONE question at a time, expect SHORT answers!
 Missing fields to collect: {missing_info}"""
@@ -117,7 +106,6 @@ Missing fields to collect: {missing_info}"""
         return base_prompt
 
     def _get_phase_instructions(self, phase: str) -> str:
-        """Get specific instructions for current interview phase"""
         missing_fields = [field for field in self.required_fields if field not in self.candidate_data]
         remaining_questions = max(0, self.max_technical_questions - self.technical_questions_asked)
         tech_stack = self.candidate_data.get('tech_stack', 'not specified yet')
@@ -177,7 +165,6 @@ Missing fields to collect: {missing_info}"""
         return instructions.get(phase, "Continue the interview professionally.")
 
     def _generate_ai_response(self, user_input: str) -> str:
-        """Generate AI response with full conversation context"""
         try:
             # Prepare messages with full conversation history
             messages = [
@@ -208,7 +195,6 @@ Missing fields to collect: {missing_info}"""
             return f"I apologize, but I'm experiencing a technical issue. Could you please repeat your response? (Error: {str(e)})"
 
     def process_message(self, user_input: str) -> str:
-        """Process user message and return response"""
         if not user_input.strip():
             return "I didn't receive any input. Could you please tell me more?"
         
@@ -230,7 +216,6 @@ Missing fields to collect: {missing_info}"""
         return response
 
     def process_message_stream(self, user_input: str):
-        """Process message with streaming response"""
         if not user_input.strip():
             yield "I didn't receive any input. Could you please tell me more?"
             return
@@ -281,7 +266,6 @@ Missing fields to collect: {missing_info}"""
             self._add_to_history('assistant', error_msg)
 
     def _simple_extract_information(self, text: str):
-        """Extract candidate information from text using enhanced patterns"""
         text_lower = text.lower()
         
         # Enhanced name extraction
@@ -305,7 +289,7 @@ Missing fields to collect: {missing_info}"""
         if not self.candidate_data.get('email'):
             email_match = re.search(r'\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b', text)
             if email_match:
-                self.candidate_data['email'] = email_match.group()        # Enhanced phone extraction - Improved for Indian numbers
+                self.candidate_data['email'] = email_match.group()
         if not self.candidate_data.get('phone'):
             phone_patterns = [
                 # Indian phone numbers with +91 prefix
@@ -474,7 +458,6 @@ Missing fields to collect: {missing_info}"""
                 self.candidate_data['tech_stack'] = ', '.join(found_techs)
 
     def _update_interview_progress(self):
-        """Update interview progress based on current state"""
         missing_info = [field for field in self.required_fields if field not in self.candidate_data]
         
         # If in greeting phase and we have some info, move to information gathering
@@ -495,7 +478,6 @@ Missing fields to collect: {missing_info}"""
                 self.current_phase_index = min(self.current_phase_index + 1, len(self.interview_phases) - 1)
                 
     def _add_to_history(self, role: str, content: str):
-        """Add message to conversation history"""
         self.conversation_history.append({
             "role": role,
             "content": content,
@@ -503,7 +485,6 @@ Missing fields to collect: {missing_info}"""
         })
         
     def get_conversation_summary(self) -> Dict:
-        """Get conversation summary and analysis"""
         # Validate required fields are present and correctly formatted
         self._validate_and_normalize_candidate_data()
         
@@ -521,7 +502,6 @@ Missing fields to collect: {missing_info}"""
         }
         
     def _validate_and_normalize_candidate_data(self):
-        """Ensure all candidate data is properly formatted and normalized before export"""
         # Ensure phone numbers have +91 prefix for Indian numbers
         if 'phone' in self.candidate_data:
             phone = self.candidate_data['phone']
@@ -546,7 +526,6 @@ Missing fields to collect: {missing_info}"""
                 self.candidate_data['location'] = location.title()
 
     def export_interview_data(self, filename: str = None) -> str:
-        """Export comprehensive interview data"""
         if not filename:
             # Include candidate name if available
             name_part = self.candidate_data.get('name', '').split()[0] if self.candidate_data.get('name') else ''
@@ -584,8 +563,8 @@ Missing fields to collect: {missing_info}"""
             return f"Interview data exported to {filename}"
         except Exception as e:
             return f"Export failed: {str(e)}"
+        
     def _verify_export_completeness(self, export_data: Dict) -> None:
-        """Verify that all required fields are properly populated in the export data"""
         candidate_info = export_data.get("candidate_information", {})
         
         # Check for critical fields and ensure proper formatting
