@@ -45,6 +45,9 @@ TalentScout is an AI-powered conversational hiring assistant designed to automat
 ## Installation and Setup
 
 1. Clone the repository
+   ```
+   git clone https://github.com/SimpNick6703/TalentScout-Hiring-AI-Assistant.git
+   ```
 2. Install dependencies:
    ```
    pip install -r requirements.txt
