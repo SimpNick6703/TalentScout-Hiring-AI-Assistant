@@ -49,17 +49,17 @@ TalentScout is an AI-powered conversational hiring assistant designed to automat
    git clone https://github.com/SimpNick6703/TalentScout-Hiring-AI-Assistant.git
    ```
 2. Install dependencies:
-   ```
-   pip install -r requirements.txt
-   ```
+```
+pip install -r requirements.txt
+```
 3. Configure LLM settings in `config.py`:
    - Set appropriate `base_url` and `api_key` in the `OPENAI_CONFIG` section
    - Adjust model parameters as needed
 
 4. Run the application:
-   ```
-   streamlit run app.py
-   ```
+```
+streamlit run app.py
+```
 
 ## Interview Flow
 
