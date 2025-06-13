@@ -1,0 +1,21 @@
+# Core dependencies
+streamlit==1.28.1
+openai==1.3.0
+
+# # Data handling and validation
+# pandas==2.1.3
+# pydantic==2.5.0
+# email-validator==2.1.0
+
+# # UI enhancements
+# plotly==5.17.0
+# streamlit-chat==0.1.1
+# streamlit-option-menu==0.3.6
+
+# # Security and privacy
+# cryptography==41.0.7
+
+# # Development and testing (optional)
+# pytest==7.4.3
+# black==23.11.0
+# flake8==6.1.0

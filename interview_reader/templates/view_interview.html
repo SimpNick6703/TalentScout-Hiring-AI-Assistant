@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interview Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .flash {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        .flash.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .flash.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .nav {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        .nav a {
+            margin-right: 15px;
+        }
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .message.assistant {
+            background-color: #e1f5fe;
+            border-left: 4px solid #03a9f4;
+        }
+        .message.user {
+            background-color: #f0f0f0;
+            border-left: 4px solid #9e9e9e;
+        }
+        .message-header {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #555;
+            font-size: 0.85em;
+        }
+        .stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            flex: 1;
+            min-width: 200px;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+        .progress-bar {
+            height: 20px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: #3498db;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav">
+            <a href="/">Home</a>
+            <a href="/upload">Upload Interview</a>
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <h1>Interview Details: {{ filename }}</h1>
+        
+        {% if interview %}
+            <div class="section">                <h2>Summary</h2>
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-label">Interview Date</div>
+                        <div class="stat-value">{{ interview.interview_metadata.formatted_timestamp }}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Completion</div>
+                        <div class="stat-value">{{ interview.interview_analysis.completion_percentage|format_completion }}</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {{ interview.interview_analysis.completion_percentage }}%;"></div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Current Phase</div>
+                        <div class="stat-value">{{ interview.interview_metadata.current_phase|replace('_', ' ')|title }}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Interview Status</div>
+                        <div class="stat-value">
+                            {% if interview.interview_summary is defined %}
+                                {{ "Completed" if interview.interview_summary.interview_completed else "In Progress" }}
+                            {% elif interview.interview_metadata is defined %}
+                                {{ "Completed" if interview.interview_metadata.interview_completed else "In Progress" }}
+                            {% else %}
+                                Unknown
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                {% if (interview.interview_metadata is defined and interview.interview_metadata.interview_completed) or 
+                       (interview.interview_summary is defined and interview.interview_summary.interview_completed) %}
+                    <div class="flash success">Interview completed successfully</div>
+                {% else %}
+                    <div class="flash error">Interview not completed</div>
+                {% endif %}
+            </div>
+            
+            <div class="section">
+                <h2>Candidate Information</h2>
+                <table>
+                    <tr>
+                        <th>Field</th>
+                        <th>Value</th>
+                    </tr>
+                    {% for key, value in interview.candidate_information.items() %}
+                        <tr>
+                            <td>{{ key|replace('_', ' ')|title }}</td>
+                            <td>{{ value }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+                
+                {% if interview.interview_analysis.missing_fields %}
+                    <div class="flash error">
+                        Missing fields: {{ interview.interview_analysis.missing_fields|join(', ') }}
+                    </div>
+                {% endif %}
+            </div>
+              <div class="section">
+                <h2>Conversation History</h2>
+                
+                {% set conversation = interview.conversation_history if interview.conversation_history is defined else interview.full_conversation %}
+                
+                {% for message in conversation %}
+                    <div class="message {{ message.role }}">
+                        <div class="message-header">
+                            {{ message.role|title }} - {{ message.formatted_timestamp if message.formatted_timestamp else format_timestamp(message.timestamp) }}
+                        </div>
+                        <div class="message-content">
+                            {{ message.content|replace('\n', '<br>')|safe }}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+              <div class="section">
+                <h2>Interview Analysis</h2>
+                <table>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Value</th>
+                    </tr>
+                    <tr>
+                        <td>Completion Percentage</td>
+                        <td>
+                            {% if interview.interview_analysis is defined %}
+                                {{ interview.interview_analysis.completion_percentage|format_completion }}
+                            {% elif interview.interview_summary is defined %}
+                                {{ interview.interview_summary.completion_percentage|format_completion }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                    </tr>
+                    
+                    {% if interview.interview_analysis is defined and interview.interview_analysis.phases_completed is defined %}
+                        <tr>
+                            <td>Phases Completed</td>
+                            <td>{{ interview.interview_analysis.phases_completed }} / {{ interview.interview_analysis.total_phases }}</td>
+                        </tr>
+                    {% endif %}
+                    
+                    {% if interview.interview_analysis is defined and interview.interview_analysis.phases_covered is defined %}
+                        <tr>
+                            <td>Phases Covered</td>
+                            <td>{{ interview.interview_analysis.phases_covered }}</td>
+                        </tr>
+                    {% endif %}
+                    
+                    <tr>
+                        <td>Total Messages</td>
+                        <td>
+                            {% if interview.interview_metadata is defined %}
+                                {{ interview.interview_metadata.total_messages }}
+                            {% elif interview.interview_analysis is defined and interview.interview_analysis.total_messages is defined %}
+                                {{ interview.interview_analysis.total_messages }}
+                            {% else %}
+                                {{ (interview.conversation_history|default(interview.full_conversation|default([])))|length }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    
+                    {% if interview.interview_analysis is defined and interview.interview_analysis.missing_fields is defined and interview.interview_analysis.missing_fields %}
+                        <tr>
+                            <td>Missing Fields</td>
+                            <td>{{ interview.interview_analysis.missing_fields|join(', ') }}</td>
+                        </tr>
+                    {% elif interview.interview_summary is defined and interview.interview_summary.missing_information is defined and interview.interview_summary.missing_information %}
+                        <tr>
+                            <td>Missing Fields</td>
+                            <td>{{ interview.interview_summary.missing_information|join(', ') }}</td>
+                        </tr>
+                    {% endif %}
+                    
+                    {% if interview.interview_analysis is defined and interview.interview_analysis.estimated_duration is defined %}
+                        <tr>
+                            <td>Estimated Duration</td>
+                            <td>{{ interview.interview_analysis.estimated_duration }}</td>
+                        </tr>
+                    {% endif %}
+                    
+                    {% if interview.interview_analysis is defined and interview.interview_analysis.engagement_level is defined %}
+                        <tr>
+                            <td>Engagement Level</td>
+                            <td>{{ interview.interview_analysis.engagement_level }}%</td>
+                        </tr>
+                    {% endif %}
+                </table>
+            </div>
+        {% else %}
+            <div class="flash error">Error: Could not load interview data</div>
+        {% endif %}
+    </div>
+</body>
+</html>
