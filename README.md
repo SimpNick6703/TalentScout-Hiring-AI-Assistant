@@ -22,7 +22,7 @@ TalentScout is an AI-powered conversational hiring assistant designed to automat
 - **Provider-Agnostic**: Configurable to work with different LLM providers
 ## Demonstration
 
-![Demo Video](https://raw.githubusercontent.com/SimpNick6703/TalentScout-Hiring-AI-Assistant/refs/heads/main/Demo%20Video.mp4)
+https://github.com/user-attachments/assets/9f93f0aa-6a01-44cd-99dc-9243dc7cc32d
 
 ## Project Structure
 
