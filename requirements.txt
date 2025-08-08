@@ -1,6 +1,6 @@
 # Core dependencies
-streamlit==1.47.1
-openai==1.98.0
+streamlit==1.48.0
+openai==1.99.3
 
 # # Data handling and validation
 # pandas==2.1.3
